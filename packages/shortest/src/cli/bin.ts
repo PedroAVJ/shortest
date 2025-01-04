@@ -19,7 +19,7 @@ process.on("warning", (warning) => {
 const VALID_FLAGS = [
   "--headless",
   "--github-code",
-  "--debug-ai",
+  "--debug",
   "--help",
   "--no-cache",
   "-h",
@@ -36,7 +36,7 @@ ${pc.bold("Usage:")}
 
 ${pc.bold("Options:")}
   --headless          Run tests in headless browser mode
-  --debug-ai          Show AI conversation and decision process
+  --debug             Show AI conversation and decision process, as well as errors
   --target=<url>      Set target URL for tests (default: http://localhost:3000)
   --github-code       Generate GitHub 2FA code for authentication
   --no-cache          Disable caching (storing browser actions between tests)
@@ -134,7 +134,7 @@ async function main() {
     .find((arg) => arg.startsWith("--target="))
     ?.split("=")[1];
   const cliTestPattern = args.find((arg) => !arg.startsWith("--"));
-  const debugAI = args.includes("--debug-ai");
+  const debugAI = args.includes("--debug");
   const noCache = args.includes("--no-cache");
 
   try {

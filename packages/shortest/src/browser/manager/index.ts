@@ -3,6 +3,7 @@ import { URL } from "url";
 import pc from "picocolors";
 import { chromium, Browser, BrowserContext } from "playwright";
 import { ShortestConfig } from "../../types/config";
+import { Logger } from "../../utils/logger";
 import { getInstallationCommand } from "../../utils/platform";
 
 export class BrowserManager {
@@ -24,6 +25,7 @@ export class BrowserManager {
   }
 
   async launch(): Promise<BrowserContext> {
+    const logger = new Logger();
     try {
       this.browser = await chromium.launch({
         headless: this.config.headless ?? false,
@@ -46,6 +48,10 @@ export class BrowserManager {
           headless: this.config.headless ?? false,
         });
       } else {
+        logger.reportError(
+          "Failed to launch browser",
+          error instanceof Error ? error.message : "Unknown error",
+        );
         // If it's some other error, rethrow
         throw error;
       }
@@ -57,7 +63,14 @@ export class BrowserManager {
 
     const page = await this.context.newPage();
     await page.goto(this.normalizeUrl(this.config.baseUrl));
-    await page.waitForLoadState("networkidle");
+    try {
+      await page.waitForLoadState("networkidle");
+    } catch (error) {
+      logger.reportError(
+        "Page load timeout - network activity didn't stabilize",
+        error instanceof Error ? error.message : "Unknown error",
+      );
+    }
 
     return this.context;
   }
